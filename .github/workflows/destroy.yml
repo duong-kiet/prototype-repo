@@ -1,0 +1,64 @@
+# ===========================
+# Destroy Infrastructure
+# ===========================
+# Chạy thủ công để xóa toàn bộ AWS resources
+
+name: 🗑️ Destroy Infrastructure
+
+on:
+  workflow_dispatch:  # Chỉ chạy khi bấm nút thủ công
+    inputs:
+      confirm:
+        description: 'Nhập "DESTROY" để xác nhận xóa tất cả resources'
+        required: true
+        type: string
+
+env:
+  AWS_REGION: ap-southeast-1
+  TF_WORKING_DIR: terraform
+
+jobs:
+  destroy:
+    name: "🗑️ Terraform Destroy"
+    runs-on: ubuntu-latest
+    
+    # Chỉ chạy nếu nhập đúng "DESTROY"
+    if: github.event.inputs.confirm == 'DESTROY'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0
+
+      - name: Terraform Init
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform init
+
+      - name: Terraform Destroy
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform destroy -auto-approve
+
+      - name: Confirm Destruction
+        run: |
+          echo "# 🗑️ Infrastructure Destroyed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "All AWS resources have been deleted successfully." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Destroyed resources:**" >> $GITHUB_STEP_SUMMARY
+          echo "- VPC and Subnets" >> $GITHUB_STEP_SUMMARY
+          echo "- NAT Gateway" >> $GITHUB_STEP_SUMMARY
+          echo "- ECR Repository" >> $GITHUB_STEP_SUMMARY
+          echo "- ECS Cluster and Service" >> $GITHUB_STEP_SUMMARY
+          echo "- Application Load Balancer" >> $GITHUB_STEP_SUMMARY
+
