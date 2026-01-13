@@ -201,7 +201,7 @@ jobs:
           mkdir -p output
           prowler aws \
             --severity critical high \
-            --output-formats html csv json \
+            --output-formats html csv json-ocsf \
             --output-directory output \
             --no-banner
         continue-on-error: true  # Prowler có thể fail nếu tìm thấy issues
