@@ -3,7 +3,7 @@
 # ===========================
 # Chạy thủ công để xóa toàn bộ AWS resources
 
-name: 🗑️ Destroy Infrastructure
+name: Destroy Infrastructure
 
 on:
   workflow_dispatch:  # Chỉ chạy khi bấm nút thủ công

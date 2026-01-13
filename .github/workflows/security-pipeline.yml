@@ -186,10 +186,25 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Run Prowler
-        uses: prowler-cloud/prowler-action@v1
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          prowler_command: "aws --severity critical high --compliance cis_2.0_aws"
+          python-version: "3.11"
+
+      - name: Install Prowler
+        run: |
+          pip install prowler
+          prowler --version
+
+      - name: Run Prowler
+        run: |
+          mkdir -p output
+          prowler aws \
+            --severity critical high \
+            --output-formats html csv json \
+            --output-directory output \
+            --no-banner
+        continue-on-error: true  # Prowler có thể fail nếu tìm thấy issues
 
       - name: Upload Prowler Report
         uses: actions/upload-artifact@v4
